@@ -3,20 +3,15 @@ import numpy as np
 import torch
 from transformers import AutoModelForSemanticSegmentation, AutoFeatureExtractor
 
-# Modeli ve feature extractor'ı yükle
 model_name = "google/deeplabv3_mobilenet_v2_1.0_513"
 feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
 model = AutoModelForSemanticSegmentation.from_pretrained(model_name)
 
-# Cihaz ayarı (GPU veya CPU)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 model.eval()
-
-# Arka plan resmi yüklenir
 background = cv2.imread('C:/Users/tunahan/Desktop/background/arkaPlan.jpg')
 
-# Kamera açılır
 cap = cv2.VideoCapture(0)
 
 while True:
@@ -24,14 +19,11 @@ while True:
     if not ret:
         break
 
-    # Görüntüyü preprocess et
     inputs = feature_extractor(images=frame, return_tensors="pt").to(device)
 
-    # Modelden tahmin al
     with torch.no_grad():
         outputs = model(**inputs)
 
-    # Çıktıları al
     logits = outputs.logits
     predicted = torch.argmax(logits, dim=1).squeeze().cpu().numpy()
 
